@@ -135,10 +135,10 @@ np.save("optigal_{}_{}_{}.npy".format(ndim, nwalkers, iterations),(samples,p_ran
 ##### Get the shape of the plot
 nwalkers,iterations,ndims = samples.shape
 ncols = 3
-nrows = 2
+nrows = 5
 
 ##### labeling
-labels=[r"$f_0$", r"$\sigma$", r"$Inc$", r"PA", r"$\Delta$RA", r"$\Delta$Dec"]
+#labels=[r"$f_0$", r"$\sigma$", r"$Inc$", r"PA", r"$\Delta$RA", r"$\Delta$Dec"]
 
 ##### Make a figure
 fig, axes = plt.subplots(nrows=nrows,ncols=ncols, figsize=(15, 10), sharex=True)
@@ -146,7 +146,7 @@ for i in range(ndims):
     ax = axes.flatten()[i]
     _=ax.plot(np.transpose(samples[:, :, i]), "k", alpha=0.3)
     _=ax.set_xlim(0, iterations)
-    _=ax.set_ylabel(labels[i])
+#    _=ax.set_ylabel(labels[i])
 #    _=ax.yaxis.set_label_coords(-0.1, 0.5)
 #    _=ax.plot([0,iterations],[p_range[i,0],p_range[i,0]])
 #    _=ax.plot([0,iterations],[p_range[i,1],p_range[i,1]])

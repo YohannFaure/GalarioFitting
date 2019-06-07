@@ -70,8 +70,8 @@ if __name__=='__main__':
         p0 = np.array([10., 0.1, 0.1, 140., 0.1, 0.1]) #  2 parameters for the model + 4 (inc, PA, dRA, dDec)
         p_range = np.array([[1., 100.],    #f0
             [2e-5, 2e5],   #sigma
-            [-1., 91.],  #inc
-            [-1., 181.], #pa
+            [-.001, 90.001],  #inc
+            [-.001, 180.001], #pa
             [-2., 2.],  #dra
             [-2., 2.]])  #ddec
 
@@ -86,7 +86,7 @@ if __name__=='__main__':
 
     ##### load data
     u, v, Re, Im, w = np.require(np.loadtxt(args.location, unpack=True), requirements='C')
-
+    w=w/100
     ##### for conversion
     #wavelength = 0.00087  # [m]
     #u /= wavelength

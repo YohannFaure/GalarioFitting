@@ -32,7 +32,7 @@ def multiplot(samples,labels=None,figshape=None,size=(20,25),save=None,limits=No
     """Plots the parameters in function of time
     """
     ##### get info
-    samplesbis=samples[:,::10,:]
+    samplesbis=samples[:,-600:,:]
     nwalkers,iterations,ndims = samplesbis.shape
     ##### set size of the figure
     if figshape:
@@ -68,7 +68,7 @@ def cornerplot(samples,labels=None,save=None):
     Beware of the segmentation faults..."""
     nwalkers,iterations,ndims = samples.shape
     ndims=min(6,ndims)
-    cornering=(samples[:,-1000:,:ndims].reshape((-1,ndims)))
+    cornering=(samples[:,-500:,:ndims].reshape((-1,ndims)))
     if labels:
         fig = corner.corner(cornering, quantiles=[0.16, 0.50, 0.84],labels=labels[:ndims],show_titles=True,label_kwargs={'labelpad':20, 'fontsize':0}, fontsize=8)
     else :
@@ -95,6 +95,6 @@ if __name__=="__main__":
     size=eval(args.size)
     figshape=eval(args.figshape)
     save=args.save
-    #multiplot(samples,labels,figshape=figshape,size=size,save=save)#,limits=(thetaminbis,thetamaxbis))
+    multiplot(samples,labels,figshape=figshape,size=size,save=save)#,limits=(thetaminbis,thetamaxbis))
     cornerplot(samples,labels=None,save=save)
 

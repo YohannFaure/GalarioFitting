@@ -22,7 +22,7 @@ p_range = np.array([
 
 p0 = np.array([10.5, 0.35, 40., 140., 0.1, 0.1]) #  2 parameters for the model + 4 (inc, PA, dRA, dDec)
 
-p_range = np.array([[10, 11],    #f0
+p_range = np.array([[10., 11.],    #f0
             [0.25, 0.5],   #sigma
             [30., 50.],  #inc
             [120., 180.], #pa
