@@ -10,15 +10,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 ##### galario
-from galario.double import get_image_size, chi2Profile # computes the image size required from the (u,v) data , computes a chi2
+from galario.double_cuda import get_image_size, chi2Profile # computes the image size required from the (u,v) data , computes a chi2
 from galario import deg, arcsec # for conversions
 ##### Emcee
 from emcee import EnsembleSampler
 from multiprocessing import Pool
 
 ##### Because we don't want each thread to use multiple core for numpy computation. That forces the use of a proper multithreading
-import os
-os.environ["OMP_NUM_THREADS"] = "1"
+#import os
+#os.environ["OMP_NUM_THREADS"] = "1"
 
 
 Rmin = 1e-6  # arcsec
@@ -86,14 +86,40 @@ def ModelJ1615(p):
         GaussianRing(amplitude_3, width_3, center_3)+
         GaussianRing(amplitude_4, width_4, center_4))
 
-p0 = np.array([igauss*0.97,0.02,
-    igauss*.98,0.1,3.,0.12,
-    igauss*.95,.5,0.15,
-    igauss*.93,.05,.5,
-    igauss*.93,.05,.7])
+#p0 = np.array([igauss*0.97,0.02,
+#    igauss*.98,0.1,3.,0.12,
+#    igauss*.95,.5,0.15,
+#    igauss*.93,.05,.5,
+#    igauss*.93,.05,.7])
 
-p_range=np.transpose(np.array((p0/100,p0*100)))
+labels=['f0_0', 'sigma_0',
+        'i0_1','sig_1','gam_1','center_1',
+        'amplitude_2', 'width_2', 'center_2',
+        'amplitude_3', 'width_3', 'center_3',
+        'amplitude_4', 'width_4', 'center_4']
 
+#p_range=np.transpose(np.array((p0/100,p0*100)))
+
+p_range=np.array([
+    [8.,15.],
+        [-0.,0.02],#
+    [8.,12.],
+        [0.05,0.15],
+        [0.1,5.],
+        [-0.,0.4],#
+    [1.,20.],
+        [0.1,1.],
+        [-0.,0.3],#
+    [5.,15.],
+        [0.01,0.3],
+        [0.4,1.2],#
+    [2.,12.],
+        [-0.,0.1],
+        [-0.,1.2]
+    ])
+
+
+p0=np.mean(p_range,axis=1)
 #plt.plot(f);plt.plot(ModelJ1615(p0));plt.show()
 
 
@@ -116,8 +142,8 @@ def lnpostfn(p):
 
 nwalkers=150
 ndim=15
-nthreads=10
-iterations=500
+nthreads=4
+iterations=100
 
 pos = np.array([(1. + 1.e-1*np.random.random(ndim))*p0 for i in range(nwalkers)])
 
@@ -125,4 +151,6 @@ with Pool(processes=nthreads) as pool:
     sampler = EnsembleSampler(nwalkers, ndim, lnpostfn,pool=pool)
     pos, prob, state = sampler.run_mcmc(pos, iterations, progress=True)
 
-np.save('firsttestopti.npy',sampler.chain)
+np.save('results/optimization/optigal_{}_{}_{}'.format(ndim,nwalkers,iterations),(samples,p_range[:,0],p_range[:,1],labels))
+
+#np.save('firsttestopti.npy',sampler.chain)
