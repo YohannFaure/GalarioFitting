@@ -87,6 +87,7 @@ if __name__=="__main__":
     parser.add_argument("--figshape", help = "Shape of the multiple plot.",type = str,default="None")
     parser.add_argument("--size", help = "Size of the multiple plot.",type = str,default="(20,25)")
     parser.add_argument("--save", help = "Will not plot the result and only give it if present.",type = str, default=None)
+    parser.add_argument("--limits", help='show the limits of the optimization.', action='store_true')
     args = parser.parse_args()
     ##### Open the data
     #location = '/home/yohann/Desktop/Stage2019/DiskFitting/results/optimization/opti_37_300_5000part3.npy'
@@ -95,6 +96,9 @@ if __name__=="__main__":
     size=eval(args.size)
     figshape=eval(args.figshape)
     save=args.save
-    multiplot(samples,labels,figshape=figshape,size=size,save=save,limits=(thetaminbis,thetamaxbis))
+    if args.limits:
+        multiplot(samples, labels, figshape=figshape, size=size, save=save, limits=(thetaminbis,thetamaxbis))
+    else :
+        multiplot(samples, labels, figshape=figshape, size=size, save=save)
     cornerplot(samples,labels=None,save=save)
 
