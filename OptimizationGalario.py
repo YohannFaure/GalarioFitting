@@ -154,13 +154,13 @@ p_range=np.array([
         [0.1,0.2],#
     [9.,11.],
         [0.3,0.5],
-        [0.2,0.3],#
-    [8.,9.],
+        [0.1,0.4],#
+    [7.,11.],
         [0.01,0.25],
-        [0.4,0.7],#
-    [8.,9.],
+        [0.5,0.9],#
+    [8.,11.],
         [0.1,0.25],
-        [0.4,0.7]
+        [0.5,0.8]
     ])
 
 
@@ -172,12 +172,12 @@ p_range=np.array([
 
 #p0=a[x]
 
-nwalkers=140
+nwalkers=280
 ndim=14
 nthreads=20
-iterations=2000
+iterations=1000
 
-pos = np.array([(1. + 1.e-2*np.random.random(ndim))*p0 for i in range(nwalkers)])
+pos = np.array([(1. + 2.e-1*np.random.random(ndim))*p0 for i in range(nwalkers)])
 
 
 import os
