@@ -175,7 +175,7 @@ p_range=np.array([
 nwalkers=280
 ndim=14
 nthreads=20
-iterations=1000
+iterations=2000
 
 pos = np.array([(1. + 2.e-1*np.random.random(ndim))*p0 for i in range(nwalkers)])
 
