@@ -16,6 +16,7 @@ import corner
 import matplotlib as mpl
 
 """
+##### For pgf exportation
 mpl.use('pgf')
 pgf_with_rc_fonts = {
     "font.family": "serif",
@@ -44,17 +45,16 @@ def multiplot(samples,labels=None,figshape=None,size=(20,25),save=None,limits=No
     fig, axes = plt.subplots(nrows=nrows,ncols=ncols, figsize=size, sharex=True)
     for i in range(ndims):
         ax = axes.flatten()[i]
-        _=ax.plot(np.transpose(samplesbis[:, :, i]), "k", alpha=0.2)
-        _=ax.set_xlim(0, iterations)
+        ax.plot(np.transpose(samplesbis[:, :, i]), "k", alpha=0.2)
+        ax.set_xlim(0, iterations)
         if labels:
-            _=ax.set_ylabel(labels[i])
+            ax.set_ylabel(labels[i])
         ax.grid(True)
-    #    _=ax.yaxis.set_label_coords(-0.1, 0.5)
         if limits:
             thetaminbis,thetamaxbis=limits
-            _=ax.plot([0,iterations],[thetaminbis[i],thetaminbis[i]])
-            _=ax.plot([0,iterations],[thetamaxbis[i],thetamaxbis[i]])
-    _=ax.set_xlabel('iterations')
+            ax.plot([0,iterations],[thetaminbis[i],thetaminbis[i]])
+            ax.plot([0,iterations],[thetamaxbis[i],thetamaxbis[i]])
+    ax.set_xlabel('iterations')
     plt.tight_layout()
     ##### save
     if save:
@@ -90,7 +90,6 @@ if __name__=="__main__":
     parser.add_argument("--limits", help='show the limits of the optimization.', action='store_true')
     args = parser.parse_args()
     ##### Open the data
-    #location = '/home/yohann/Desktop/Stage2019/DiskFitting/results/optimization/opti_37_300_5000part3.npy'
     samples,thetaminbis,thetamaxbis,labels = np.load(args.location)
     # thetamin and thetamax are defined in the ModelingEmcee.py file. It correspnds to the limits of the fitting. Labels are just the names of the parameters
     size=eval(args.size)

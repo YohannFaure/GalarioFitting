@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+"""
+just merges some files
+suppose I want to merge optigal0.npy, optigal1.npy, optigal2.npy and optigal3.npy :
+
+python3 MergeGalOpti optigal 0 3
+
+it will be saved in optigalmerged.npy
+"""
 import numpy as np
 
 def Merge(prefix,start,end):

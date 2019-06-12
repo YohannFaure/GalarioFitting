@@ -18,10 +18,6 @@ from galario import deg, arcsec # for conversions
 from emcee import EnsembleSampler
 from multiprocessing import Pool
 
-##### Because we don't want each thread to use multiple core for numpy computation. That forces the use of a proper multithreading
-import os
-os.environ["OMP_NUM_THREADS"] = "1"
-
 ##### Define a gaussian profile
 def GaussianProfile(f0, sigma):
     """ Gaussian brightness profile.
@@ -35,6 +31,7 @@ def convertp(p):
 
 ##### define the cost functions
 def lnpriorfn(p):
+    # If it goes out of bounds
     if np.any(p<p_range[:,0]) or np.any(p>p_range[:,1]):
         return(-np.inf)
     return(0.0)
@@ -52,6 +49,7 @@ def lnpostfn(p):
     return(-0.5 * chi2)
 
 if __name__=='__main__':
+    ##### Argparser
     import argparse
     parser = argparse.ArgumentParser(description = 'arguments')
     parser.add_argument("location", help = "File to use as image data.",type = str)
@@ -63,10 +61,13 @@ if __name__=='__main__':
     parser.add_argument("--seed",help='You can put a seed in a .py file, and use it.',type=str, default=None)
     parser.add_argument("--split",help='If you want to split your workload in n parts, enter n here.',type=int, default=None)
     args = parser.parse_args()
+    ##### Check the seed
+    # If seed, read
     if args.seed :
         exec(open(args.seed).read())
+    # else give bad but general seed
     else :
-        ##### parameter space domain
+        # parameter space domain
         p0 = np.array([10., 0.1, 0.1, 140., 0.1, 0.1]) #  2 parameters for the model + 4 (inc, PA, dRA, dDec)
         p_range = np.array([[1., 100.],    #f0
             [2e-5, 2e5],   #sigma
@@ -81,16 +82,13 @@ if __name__=='__main__':
     nR = int(2./dR)
     dR *= arcsec
     Rmin*=arcsec
+
     ##### Define a mesh for the space
     R = np.linspace(Rmin, Rmin + dR*nR, nR, endpoint=False)
 
     ##### load data
     u, v, Re, Im, w = np.require(np.loadtxt(args.location, unpack=True), requirements='C')
     w=w/100
-    ##### for conversion
-    #wavelength = 0.00087  # [m]
-    #u /= wavelength
-    #v /= wavelength
 
     ##### get size of the image
     nxy, dxy = get_image_size(u, v, verbose=False) # Number of pixel, width of a pixel in rad
@@ -101,6 +99,7 @@ if __name__=='__main__':
     nthreads   = args.nthreads               # CPU threads that emcee should use
     iterations = args.iterations             # total number of MCMC steps
 
+    ##### Check if you want to resume something
     if args.resume:
         samples,_,_,_=np.load(args.resume,allow_pickle=True)
         pos=samples[:,-1,:]
@@ -108,6 +107,12 @@ if __name__=='__main__':
         ##### initialize the walkers with an ndim-dimensional Gaussian ball
         pos = np.array([(1. + 1e-4*np.random.random(ndim))*p0 for i in range(nwalkers)])
 
+    ##### Because we don't want each thread to use multiple core for numpy computation.
+    ##### That forces the use of a proper multithreading
+    import os
+    os.environ["OMP_NUM_THREADS"] = "1"
+
+    ##### If we want to split the data
     if args.split :
         n=args.split
         m=iterations//n
@@ -119,7 +124,7 @@ if __name__=='__main__':
 
             samples=sampler.chain
             #To save the data.
-            np.save("results/optimization/optigal_{}_{}_{}{}_split{}.npy".format(ndim, nwalkers, iterations, args.suffix,i),(samples,p_range[:,0],p_range[:,1],[r"$f_0$", r"$\sigma$", r"$i$", r"PA", r"$\Delta$RA", r"$\Delta$Dec"]))
+            np.save("results/optimization/TiltFinderVis_{}_{}_{}{}_split{}.npy".format(ndim, nwalkers, iterations, args.suffix,i),(samples,p_range[:,0],p_range[:,1],[r"$f_0$", r"$\sigma$", r"$i$", r"PA", r"$\Delta$RA", r"$\Delta$Dec"]))
         if lastm!=0:
             with Pool(processes=nthreads) as pool:
                 sampler = EnsembleSampler(nwalkers, ndim, lnpostfn,pool=pool)
@@ -127,8 +132,9 @@ if __name__=='__main__':
 
             samples=sampler.chain
             #To save the data.
-            np.save("results/optimization/optigal_{}_{}_{}{}_split{}.npy".format(ndim, nwalkers, iterations, args.suffix,n),(samples,p_range[:,0],p_range[:,1],[r"$f_0$", r"$\sigma$", r"$i$", r"PA", r"$\Delta$RA", r"$\Delta$Dec"]))
+            np.save("results/optimization/TiltFinderVis_{}_{}_{}{}_split{}.npy".format(ndim, nwalkers, iterations, args.suffix,n),(samples,p_range[:,0],p_range[:,1],[r"$f_0$", r"$\sigma$", r"$i$", r"PA", r"$\Delta$RA", r"$\Delta$Dec"]))
 
+    ##### If we don't want to split
     else :
     ##### execute the MCMC
         with Pool(processes=nthreads) as pool:
@@ -137,6 +143,6 @@ if __name__=='__main__':
 
         samples=sampler.chain
         #To save the data.
-        np.save("results/optimization/optigal_{}_{}_{}{}.npy".format(ndim, nwalkers, iterations, args.suffix),(samples,p_range[:,0],p_range[:,1],[r"$f_0$", r"$\sigma$", r"$i$", r"PA", r"$\Delta$RA", r"$\Delta$Dec"]))
+        np.save("results/optimization/TiltFinderVis_{}_{}_{}{}.npy".format(ndim, nwalkers, iterations, args.suffix),(samples,p_range[:,0],p_range[:,1],[r"$f_0$", r"$\sigma$", r"$i$", r"PA", r"$\Delta$RA", r"$\Delta$Dec"]))
     print(np.mean(pos,axis=0),'\n',np.std(pos,axis=0),'\n',np.percentile(pos,[.25,.5,.75],axis=0))
-    print('(inc,pa)=',np.mean(pos,axis=0)[2:4])
+    print('(inc,pa,dRA,dDec)=',np.median(pos,axis=0)[2:])
