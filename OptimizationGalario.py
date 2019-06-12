@@ -21,6 +21,8 @@ from multiprocessing import Pool
 #import os
 #os.environ["OMP_NUM_THREADS"] = "1"
 
+samples,_,_,_=np.load('results/optimization/optigal_14_280_2000.npy',allow_pickle=True)
+
 
 Rmin = 1e-6  # arcsec
 dR = 0.0008    # arcsec
@@ -177,8 +179,8 @@ ndim=14
 nthreads=20
 iterations=2000
 
-pos = np.array([(1. + 2.e-1*np.random.random(ndim))*p0 for i in range(nwalkers)])
-
+#pos = np.array([(1. + 2.e-1*np.random.random(ndim))*p0 for i in range(nwalkers)])
+pos=samples[:,-1,:]
 
 import os
 os.environ["OMP_NUM_THREADS"] = "1"
@@ -189,6 +191,6 @@ with Pool(processes=nthreads) as pool:
 
 samples=sampler.chain
 
-np.save('results/optimization/optigal_{}_{}_{}'.format(ndim,nwalkers,iterations),(samples,p_range[:,0],p_range[:,1],labels))
+np.save('results/optimization/optigal_{}_{}_{}part2'.format(ndim,nwalkers,iterations),(samples,p_range[:,0],p_range[:,1],labels))
 
 #np.save('firsttestopti.npy',sampler.chain)
