@@ -131,6 +131,7 @@ def lnpostfnbis(p):
 
 def tominimize(p):
     """ Log of posterior probability function """
+    print(p)
     lnp = lnpriorfn(p)
     if not np.isfinite(lnp):
         return(-np.inf)
@@ -138,31 +139,67 @@ def tominimize(p):
     f = ModelJ1615(p)
     ModelVal=sampleProfile(f,Rmin,dR,nxy,dxy,u,v)
     chi2 = chi2compute(ModelVal,Re,Im,w)
-    return(chi2)
+    return(chi2/1000000)
 
-p0=np.array([10.85096006,  0.01146675,
-    10.35811935,  0.09957152,  0.15475334,
-    9.85595757,  0.38882761,  0.24746409,
-    8.44414471,  0.06197724,  0.8,
-    8.4625868 ,  0.18377439, 0.55165571])
-
+p0list=np.array([
+        [10.92464736, 0.01183856,
+        10.30642221,  0.09737238,  0.16015055,
+        9.95183693,   0.42739781,  0.1173729 ,
+        8.41536481,   0.08035405,  0.74988449,
+        8.459264  ,   0.09994191,  0.65280675]
+        ,
+        [10.96789008, 0.01155506,
+        10.29265437,  0.09478848,  0.16229442,
+        9.98834487,   0.4406268 ,  0.07194621,
+        8.45186003,   0.08843546,  0.74950883,
+        8.49680396,   0.06784508,  0.671583  ]
+        ,
+        [1.10833490e+01,1.02650502e-02,
+        1.02918828e+01, 1.02526895e-01,  1.59372502e-01,
+        9.95803536e+00, 4.36283306e-01,  9.71339541e-02,
+        8.42835610e+00, 1.02136030e-01,  7.45828481e-01,
+        8.47980262e+00, 9.30403301e-02,  7.15890398e-01]
+        ,
+        [1.10777223e+01,9.76108116e-03,
+        1.02946656e+01, 9.51628786e-02, 1.61276380e-01,
+        9.98591971e+00, 4.39358011e-01, 7.61627194e-02,
+        8.45076133e+00, 8.50551811e-02, 7.52851430e-01,
+        8.49338800e+00, 6.67571321e-02, 6.61434890e-01]
+        ,
+        [1.10777223e+01,9.76107989e-03,
+        1.02946656e+01, 9.51628802e-02, 1.61276382e-01,
+        9.98591971e+00, 4.39358013e-01, 7.61627207e-02,
+        8.45076133e+00, 8.50551813e-02, 7.52851430e-01,
+        8.49338800e+00, 6.67571322e-02, 6.61434890e-01]
+        ,
+        [10.92464738, 0.01183863,
+        10.30642216,  0.09737231,  0.16015049,
+        9.9518369 ,   0.42739774,  0.11737283,
+        8.41536481,   0.08035404,  0.74988449,
+        8.459264  ,   0.0999419 ,  0.65280675]
+        ,
+        [1.10777223e+01,9.76107989e-03,
+        1.02946656e+01, 9.51628802e-02, 1.61276382e-01,
+        9.98591971e+00, 4.39358013e-01, 7.61627207e-02,
+        8.45076133e+00, 8.50551813e-02, 7.52851430e-01,
+        8.49338800e+00, 6.67571322e-02, 6.61434890e-01]
+        ])
 
 p_range=np.array([
-    [8.,15.],
-        [-0.,0.02],#
-    [10.,11.],
-        [0.07,0.13],
-    #    [0.1,5.],
-        [0.1,0.2],#
-    [8.,11.],
-        [0.3,0.7],
-        [0.05,0.5],#
-    [7.,11.],
-        [0.01,0.25],
-        [0.6,0.9],#
-    [7.,11.],
-        [0.1,0.25],
-        [0.4,0.8]
+    [10.6,11.7],
+        [0.006,0.016],#
+    [10.,10.5],
+        [0.07,0.12],
+            [0.1,0.2],#
+    [9.,11.],
+        [0.39,0.47],
+            [0.03,0.15],#
+    [8.,9.],
+        [0.05,0.13],
+            [0.7,0.8],#
+    [8.2,8.8],
+        [0.03,0.13],
+            [0.6,0.8]
     ])
 
 
@@ -170,16 +207,16 @@ p_range=np.array([
 #a=scipy.optimize.minimize(tominimize,a['x'],method='Nelder-Mead')
 #a=scipy.optimize.minimize(tominimize,p0,method='Powell')
 #a=scipy.optimize.minimize(tominimize,p0,method='CG')
-#a=scipy.optimize.minimize(tominimize,p0,method='BFGS',bounds=p_range)
 
-#p0=a[x]
+#####
+#p0=scipy.optimize.fmin_slsqp(tominimize,p0,bounds=p_range)
 
 nwalkers=280
 ndim=14
 nthreads=20
 iterations=2000
 
-pos = np.array([(1. + 1.e-2*np.random.random(ndim))*p0 for i in range(nwalkers)])
+pos = np.array([(1. + 1.e-2*np.random.random(ndim))*p0list[i%len(p0list)] for i in range(nwalkers)])
 #pos=samples[:,-1,:]
 
 import os
@@ -191,6 +228,6 @@ with Pool(processes=nthreads) as pool:
 
 samples=sampler.chain
 
-np.save('results/optimization/optigal_{}_{}_{}'.format(ndim,nwalkers,iterations),(samples,p_range[:,0],p_range[:,1],labels))
+np.save('results/optimization/optigal_{}_{}_{}TEST'.format(ndim,nwalkers,iterations),(samples,p_range[:,0],p_range[:,1],labels))
 
 #np.save('firsttestopti.npy',sampler.chain)
