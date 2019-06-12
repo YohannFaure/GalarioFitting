@@ -21,7 +21,7 @@ from multiprocessing import Pool
 #import os
 #os.environ["OMP_NUM_THREADS"] = "1"
 
-samples,_,_,_=np.load('results/optimization/optigal_14_280_2000.npy',allow_pickle=True)
+#samples,_,_,_=np.load('results/optimization/optigal_14_280_2000.npy',allow_pickle=True)
 
 
 Rmin = 1e-6  # arcsec
@@ -140,29 +140,29 @@ def tominimize(p):
     chi2 = chi2compute(ModelVal,Re,Im,w)
     return(chi2)
 
-p0=[10.85096006,  0.01146675,
+p0=np.array([10.85096006,  0.01146675,
     10.35811935,  0.09957152,  0.15475334,
     9.85595757,  0.38882761,  0.24746409,
-    8.44414471,  0.06197724,  0.52520985,
-    8.4625868 ,  0.18377439, 0.55165571]
+    8.44414471,  0.06197724,  0.8,
+    8.4625868 ,  0.18377439, 0.55165571])
 
 
 p_range=np.array([
     [8.,15.],
         [-0.,0.02],#
     [10.,11.],
-        [0.05,0.15],
+        [0.07,0.13],
     #    [0.1,5.],
         [0.1,0.2],#
-    [9.,11.],
-        [0.3,0.5],
-        [0.1,0.4],#
+    [8.,11.],
+        [0.3,0.7],
+        [0.05,0.5],#
     [7.,11.],
         [0.01,0.25],
-        [0.5,0.9],#
-    [8.,11.],
+        [0.6,0.9],#
+    [7.,11.],
         [0.1,0.25],
-        [0.5,0.8]
+        [0.4,0.8]
     ])
 
 
@@ -179,8 +179,8 @@ ndim=14
 nthreads=20
 iterations=2000
 
-#pos = np.array([(1. + 2.e-1*np.random.random(ndim))*p0 for i in range(nwalkers)])
-pos=samples[:,-1,:]
+pos = np.array([(1. + 1.e-2*np.random.random(ndim))*p0 for i in range(nwalkers)])
+#pos=samples[:,-1,:]
 
 import os
 os.environ["OMP_NUM_THREADS"] = "1"
@@ -191,6 +191,6 @@ with Pool(processes=nthreads) as pool:
 
 samples=sampler.chain
 
-np.save('results/optimization/optigal_{}_{}_{}part2'.format(ndim,nwalkers,iterations),(samples,p_range[:,0],p_range[:,1],labels))
+np.save('results/optimization/optigal_{}_{}_{}'.format(ndim,nwalkers,iterations),(samples,p_range[:,0],p_range[:,1],labels))
 
 #np.save('firsttestopti.npy',sampler.chain)
