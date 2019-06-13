@@ -5,6 +5,11 @@
 This finds the inclination and position angle of a disk based on a UV table, supposing it's gaussian enough.
 
 output : inc,pa,dRA,dDec
+
+launch :
+
+python3 TiltFinderVisibilities.py path/to/uvtable.txt nwalkers iterations nthreads
+
 """
 
 ##### Import modules
