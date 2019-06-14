@@ -16,14 +16,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import scipy
-
-##### galario, store is cuda is OK on that machine.
-try:
-    from galario.double_cuda import get_image_size, chi2Profile, sampleProfile # computes the image size required from the (u,v) data , computes a chi2
-    cuda=True
-except :
-    from galario.double import get_image_size, chi2Profile, sampleProfile # computes the image size required from the (u,v) data , computes a chi2
-    cuda=False
 from galario import deg, arcsec # for conversions
 
 ##### Emcee
@@ -40,9 +32,6 @@ Rmin*=arcsec
 ##### Define a mesh for the space
 R = np.linspace(Rmin, Rmin + dR*nR, nR, endpoint=False)
 u, v, Re, Im, w = np.require(np.loadtxt('uvtable2.txt', unpack=True), requirements='C')
-
-##### Get the size of the image
-nxy, dxy = get_image_size(u, v, verbose=False)
 
 ##### Define inc and PA, as well as dRA and dDec
 ##### Those values come from TiltFinderVisibilities
@@ -193,22 +182,28 @@ p0list=np.array([
         9.98591971e+00, 4.39358013e-01, 7.61627207e-02,
         8.45076133e+00, 8.50551813e-02, 7.52851430e-01,
         8.49338800e+00, 6.67571322e-02, 6.61434890e-01]
+        ,
+        [1.15e+01,5.76107989e-03,
+        1.27e+01, 9.44e-02, 1.645e-01,
+        10.05e+00, 4.5e-01, 1.6e-01,
+        8.73e+00, 8.5e-02, 7.32e-01,
+        8.6e+00, 3.e-02, 6.2e-01]
         ])
 
 p_range=np.array([
-    [10.6,11.7],
+    [10.6,15.],
         [0.006,0.016],#
     [10.,10.5],
         [0.07,0.12],
             [0.1,0.2],#
     [9.,11.],
         [0.39,0.47],
-            [0.03,0.15],#
+            [-0.0001,0.25],#
     [8.,9.],
-        [0.05,0.13],
+        [0.01,0.13],
             [0.7,0.8],#
     [8.2,8.8],
-        [0.03,0.13],
+        [0.01,0.13],
             [0.6,0.8]
     ])
 
@@ -231,7 +226,22 @@ if __name__=='__main__':
     parser.add_argument("--suffix", help = "Suffix to file name.",type = str,default='')
     parser.add_argument("--resume", help = "File to resume training",type = str,default=None)
     parser.add_argument("--split",help='If you want to split your workload in n parts, enter n here.',type=int, default=None)
+    parser.add_argument("--cuda",help='If you want to use CUDA',action='store_true')
     args = parser.parse_args()
+    ##### galario, store is cuda is OK on that machine.
+    if args.cuda:
+        try:
+            from galario.double_cuda import get_image_size, chi2Profile, sampleProfile # computes the image size required from the (u,v) data , computes a chi2
+            cuda=True
+        except :
+            from galario.double import get_image_size, chi2Profile, sampleProfile
+            cuda=False
+            print('cuda OFF')
+    else :
+        from galario.double import get_image_size, chi2Profile, sampleProfile
+        cuda=False
+    ##### Get the size of the image
+    nxy, dxy = get_image_size(u, v, verbose=False)
 
     ##### define emcee parameters
     ndim       = 14                          # number of dimensions
@@ -245,8 +255,9 @@ if __name__=='__main__':
         pos=samples[:,-1,:]
     else :
         ##### initialize the walkers with an ndim-dimensional ball
-        pos = np.array([(1. + 1.e-2*np.random.random(ndim))*p0list[i%len(p0list)] for i in range(nwalkers)])
-
+        pos1 = np.array([(1. + 1.e-2*np.random.random(ndim))*p0list[i%len(p0list)] for i in range(nwalkers//2)])
+        pos2 = np.transpose([np.random.uniform(p_range[i,0],p_range[i,1],nwalkers//2+nwalkers%2) for i in range(ndim)])
+        pos=np.concatenate((pos1,pos2),axis=0)
     if not cuda :
         ##### Because we don't want each thread to use multiple core for numpy computation.
         ##### That forces the use of a proper multithreading
