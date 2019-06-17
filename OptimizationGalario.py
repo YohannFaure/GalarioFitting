@@ -18,6 +18,16 @@ import math
 import scipy
 from galario import deg, arcsec # for conversions
 
+if __name__!='__main__':
+    try:
+        from galario.double_cuda import get_image_size, chi2Profile, sampleProfile # computes the image size required from the (u,v) data , computes a chi2
+        cuda=True
+        print('cuda ON')
+    except :
+        from galario.double import get_image_size, chi2Profile, sampleProfile
+        cuda=False
+        print('cuda OFF')
+
 ##### Emcee
 from emcee import EnsembleSampler
 from multiprocessing import Pool
@@ -62,8 +72,8 @@ def PowerGaussianRing(i0,sig,gam,center):
 
 ##### Just to define which to multiply by arcsec and which to power10
 ##### You should adapt this to your code, this is for the J1615 Model I used
-power10=np.array([0,2,5,8,11])
-ListOfParams=np.arange(0,14,1)
+power10=np.array([0,2,5,7,10])
+ListOfParams=np.arange(0,13,1)
 #compute the mask
 mask = np.ones(ListOfParams.shape,dtype=bool)
 mask[power10]=np.zeros(power10.shape)
@@ -78,17 +88,17 @@ def pre_conversion(p):
 
 def ModelJ1615(p):
     """J1615 modelisation. I just added one gaussian and 4 gaussian rings"""
-    f0_0, sigma_0,amplitude_1, width_1, center_1,amplitude_2, width_2, center_2,amplitude_3, width_3, center_3,amplitude_4, width_4, center_4 = pre_conversion(p)
+    f0_0, sigma_0,amplitude_1, width_1, center_1,f0_2,sigma0_2,amplitude_3, width_3, center_3,amplitude_4, width_4, center_4 = pre_conversion(p)
     return(GaussianProfile(f0_0, sigma_0)+
         GaussianRing(amplitude_1, width_1, center_1)+
-        GaussianRing(amplitude_2, width_2, center_2)+
+        GaussianProfile(f0_2,sigma0_2)+
         GaussianRing(amplitude_3, width_3, center_3)+
         GaussianRing(amplitude_4, width_4, center_4))
 
 ##### define the displayed labels
 labels=['f0_0', 'sigma_0',
         'amplitude_1', 'width_1', 'center_1',
-        'amplitude_2', 'width_2', 'center_2',
+        'f0_2', 'sigma_2',
         'amplitude_3', 'width_3', 'center_3',
         'amplitude_4', 'width_4', 'center_4']
 
@@ -143,68 +153,67 @@ def tominimize(p):
 p0list=np.array([
         [10.92464736, 0.01183856,
         10.30642221,  0.09737238,  0.16015055,
-        9.95183693,   0.42739781,  0.1173729 ,
+        9.95183693,   0.42739781,
         8.41536481,   0.08035405,  0.74988449,
         8.459264  ,   0.09994191,  0.65280675]
         ,
         [10.96789008, 0.01155506,
         10.29265437,  0.09478848,  0.16229442,
-        9.98834487,   0.4406268 ,  0.07194621,
+        9.98834487,   0.4406268 ,
         8.45186003,   0.08843546,  0.74950883,
         8.49680396,   0.06784508,  0.671583]
         ,
         [1.10833490e+01,1.02650502e-02,
         1.02918828e+01, 1.02526895e-01,  1.59372502e-01,
-        9.95803536e+00, 4.36283306e-01,  9.71339541e-02,
+        9.95803536e+00, 4.36283306e-01,
         8.42835610e+00, 1.02136030e-01,  7.45828481e-01,
         8.47980262e+00, 9.30403301e-02,  7.15890398e-01]
         ,
         [1.10777223e+01,9.76108116e-03,
         1.02946656e+01, 9.51628786e-02, 1.61276380e-01,
-        9.98591971e+00, 4.39358011e-01, 7.61627194e-02,
+        9.98591971e+00, 4.39358011e-01,
         8.45076133e+00, 8.50551811e-02, 7.52851430e-01,
         8.49338800e+00, 6.67571321e-02, 6.61434890e-01]
         ,
         [1.10777223e+01,9.76107989e-03,
         1.02946656e+01, 9.51628802e-02, 1.61276382e-01,
-        9.98591971e+00, 4.39358013e-01, 7.61627207e-02,
+        9.98591971e+00, 4.39358013e-01,
         8.45076133e+00, 8.50551813e-02, 7.52851430e-01,
         8.49338800e+00, 6.67571322e-02, 6.61434890e-01]
         ,
         [10.92464738, 0.01183863,
         10.30642216,  0.09737231,  0.16015049,
-        9.9518369 ,   0.42739774,  0.11737283,
+        9.9518369 ,   0.42739774,
         8.41536481,   0.08035404,  0.74988449,
         8.459264  ,   0.0999419 ,  0.65280675]
         ,
         [1.10777223e+01,9.76107989e-03,
         1.02946656e+01, 9.51628802e-02, 1.61276382e-01,
-        9.98591971e+00, 4.39358013e-01, 7.61627207e-02,
+        9.98591971e+00, 4.39358013e-01,
         8.45076133e+00, 8.50551813e-02, 7.52851430e-01,
         8.49338800e+00, 6.67571322e-02, 6.61434890e-01]
         ,
         [1.15e+01,5.76107989e-03,
-        1.27e+01, 9.44e-02, 1.645e-01,
-        10.05e+00, 4.5e-01, 1.6e-01,
+        1.025e+01, 9.44e-02, 1.645e-01,
+        10.05e+00, 4.5e-01,
         8.73e+00, 8.5e-02, 7.32e-01,
         8.6e+00, 3.e-02, 6.2e-01]
         ])
 
 p_range=np.array([
     [10.6,15.],
-        [0.006,0.016],#
+        [0.000001,0.016],#
     [10.,10.5],
         [0.07,0.12],
             [0.1,0.2],#
     [9.,11.],
-        [0.39,0.47],
-            [-0.0001,0.25],#
+        [0.1,0.9],
     [8.,9.],
         [0.01,0.13],
-            [0.7,0.8],#
-    [8.2,8.8],
+            [0.7,1.],#
+    [8.2,10.],
         [0.01,0.13],
-            [0.6,0.8]
+            [0.6,.8]
     ])
 
 ##### Different other ways of obtaining classical optimizations
@@ -233,6 +242,7 @@ if __name__=='__main__':
         try:
             from galario.double_cuda import get_image_size, chi2Profile, sampleProfile # computes the image size required from the (u,v) data , computes a chi2
             cuda=True
+            print('cuda ON')
         except :
             from galario.double import get_image_size, chi2Profile, sampleProfile
             cuda=False
@@ -240,11 +250,12 @@ if __name__=='__main__':
     else :
         from galario.double import get_image_size, chi2Profile, sampleProfile
         cuda=False
+        print('cuda OFF')
     ##### Get the size of the image
     nxy, dxy = get_image_size(u, v, verbose=False)
 
     ##### define emcee parameters
-    ndim       = 14                          # number of dimensions
+    ndim       = 13                          # number of dimensions
     nwalkers   = args.nwalkers               # number of walkers
     nthreads   = args.nthreads               # CPU threads that emcee should use
     iterations = args.iterations             # total number of MCMC steps
