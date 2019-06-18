@@ -18,6 +18,7 @@ import math
 import scipy
 from galario import deg, arcsec # for conversions
 from schwimmbad import MPIPool
+import sys
 
 if __name__!='__main__':
     try:
@@ -31,8 +32,9 @@ if __name__!='__main__':
 
 ##### Emcee
 from emcee import EnsembleSampler
-from multiprocessing import Pool
 
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
 ##### Define the parameters of the mesh
 Rmin = 1e-6  # arcsec
 dR = 0.0008    # arcsec
@@ -305,6 +307,10 @@ if __name__=='__main__':
             if not pool.is_master():
                 pool.wait()
                 sys.exit(0)
+            ##### Because we don't want each thread to use multiple core for numpy computation.
+            ##### That forces the use of a proper multithreading
+            import os
+            os.environ["OMP_NUM_THREADS"] = "1"
             sampler = EnsembleSampler(nwalkers, ndim, lnpostfnbis,pool=pool)
             pos, prob, state = sampler.run_mcmc(pos, iterations, progress=True)
 
