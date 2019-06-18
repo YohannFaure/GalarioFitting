@@ -312,7 +312,7 @@ if __name__=='__main__':
             import os
             os.environ["OMP_NUM_THREADS"] = "1"
             sampler = EnsembleSampler(nwalkers, ndim, lnpostfnbis,pool=pool)
-            pos, prob, state = sampler.run_mcmc(pos, iterations, progress=True)
+            pos, prob, state = sampler.run_mcmc(pos, iterations, progress=False)
 
         samples=sampler.chain
         #To save the data.
