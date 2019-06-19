@@ -20,15 +20,8 @@ from galario import deg, arcsec # for conversions
 from schwimmbad import MPIPool
 import sys
 
-if __name__!='__main__':
-    try:
-        from galario.double_cuda import get_image_size, chi2Profile, sampleProfile # computes the image size required from the (u,v) data , computes a chi2
-        cuda=True
-        print('cuda ON')
-    except :
-        from galario.double import get_image_size, chi2Profile, sampleProfile
-        cuda=False
-        print('cuda OFF')
+from galario.double import get_image_size, chi2Profile, sampleProfile
+cuda=False
 
 ##### Emcee
 from emcee import EnsembleSampler
@@ -251,8 +244,6 @@ if __name__=='__main__':
             cuda=False
             print('cuda OFF')
     else :
-        from galario.double import get_image_size, chi2Profile, sampleProfile
-        cuda=False
         print('cuda OFF')
     ##### Get the size of the image
     nxy, dxy = get_image_size(u, v, verbose=False)
@@ -272,12 +263,6 @@ if __name__=='__main__':
         pos1 = np.array([(1. + 1.e-2*np.random.random(ndim))*p0list[i%len(p0list)] for i in range(nwalkers//2)])
         pos2 = np.transpose([np.random.uniform(p_range[i,0],p_range[i,1],nwalkers//2+nwalkers%2) for i in range(ndim)])
         pos=np.concatenate((pos1,pos2),axis=0)
-    if not cuda :
-        ##### Because we don't want each thread to use multiple core for numpy computation.
-        ##### That forces the use of a proper multithreading
-        import os
-        os.environ["OMP_NUM_THREADS"] = "1"
-
     ##### If we want to split the data
     if args.split :
         n=args.split
@@ -285,15 +270,22 @@ if __name__=='__main__':
         lastm=iterations%n
         ##### launch the mcmc
         for i in range(n):
-            with Pool(processes=nthreads) as pool:
+            with MPIPool() as pool:
+                if not pool.is_master():
+                    pool.wait()
+                    sys.exit(0)
                 sampler = EnsembleSampler(nwalkers, ndim, lnpostfnbis,pool=pool)
                 pos, prob, state = sampler.run_mcmc(pos, m, progress=True)
             # save each part
+
             samples=sampler.chain
             #To save the data.
             np.save("results/optimization/optigal_{}_{}_{}{}_split{}.npy".format(ndim, nwalkers, iterations, args.suffix, i),(samples,p_range[:,0],p_range[:,1],labels))
         if lastm!=0:
-            with Pool(processes=nthreads) as pool:
+            with MPIPool() as pool:
+                if not pool.is_master():
+                    pool.wait()
+                    sys.exit(0)
                 sampler = EnsembleSampler(nwalkers, ndim, lnpostfnbis,pool=pool)
                 pos, prob, state = sampler.run_mcmc(pos, lastm, progress=True)
 
@@ -307,13 +299,8 @@ if __name__=='__main__':
             if not pool.is_master():
                 pool.wait()
                 sys.exit(0)
-            ##### Because we don't want each thread to use multiple core for numpy computation.
-            ##### That forces the use of a proper multithreading
-            import os
-            os.environ["OMP_NUM_THREADS"] = "1"
             sampler = EnsembleSampler(nwalkers, ndim, lnpostfnbis,pool=pool)
-            pos, prob, state = sampler.run_mcmc(pos, iterations, progress=False)
-
+            pos, prob, state = sampler.run_mcmc(pos, iterations, progress=True)
         samples=sampler.chain
         #To save the data.
         np.save("results/optimization/optigal_{}_{}_{}{}.npy".format(ndim, nwalkers, iterations, args.suffix),(samples,p_range[:,0],p_range[:,1],labels))
