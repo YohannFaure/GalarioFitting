@@ -7,13 +7,13 @@
 #SBATCH --mail-type=ALL
 #SBATCH --output=results/LastOpti.out
 #SBATCH --error=results/LastOpti.err
-#SBATCH --job-name=galYF
+#SBATCH --job-name=galopti
 
 
-source activate yfaure
+conda activate GalarioFitting
 module load intel impi
-cd ~/yfaure/GalarioFitting
+cd ~/GalarioFitting
 
-srun -n $SLURM_NTASKS python3 OptimizationGalarioMPI.py --nwalkers 560 --iterations 1000 --suffix _last --resume results/optimization/optigal_13_560_2000_14Jun_1.npy
+srun -n $SLURM_NTASKS python3 OptimizationGalarioMPI.py --nwalkers 560 --iterations 1000 --suffix _last
 
-source deactivate
+conda deactivate
