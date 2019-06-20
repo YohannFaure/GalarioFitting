@@ -47,10 +47,15 @@ def Binning(vals,radius,weights,BinsNumber):
     e=np.transpose(e)
     return(r,m,e)
 
-r,m,e=Binning(Re, UVPlaneRadius, w, 100)
+def extractvalues(samples):
+    return(np.percentile(samples.reshape(samples.shape[0]*samples.shape[1],samples.shape[2]),[0.15,0.5,0.85],axis=0))
 
-plt.errorbar(r,m,e)
-plt.scatter(r,m,marker=x)
-plt.grid()
-plt.show()
+samplesImage,_,_,_=np.load('../DiskFitting/results/optimization/opti_37_300_1000part40.npy')
+valuesImage=extractvalues(samplesImage)
+
+ablist=[13,14,20,21,27,28]
+rlist=(ValuesImage[:,[13,20,27]]+ValuesImage[:,[14,21,28]])/2
+
+
+
 
