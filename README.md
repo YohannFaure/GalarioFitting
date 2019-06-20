@@ -42,6 +42,13 @@ Then you can install CUCA if you feel like it, but it's not necessary.
 
 The last package is [galario](https://mtazzari.github.io/galario/install.html)
 
+Fast version :
+```
+conda install -c conda-forge galario
+```
+
+Cuda version (it might be even more complicated than that, depending on the computer, os, etc.).
+
 ```
 conda activate GalarioFitting
 conda install -c anaconda cmake 
