@@ -21,7 +21,7 @@ If you don't know conda, see [here](https://uoa-eresearch.github.io/eresearch-co
 Then install all the necessary packages
 
 ```
-conda install -n GalarioFitting numpy scipy matplotlib tqdm
+conda install -n GalarioFitting numpy scipy matplotlib tqdm cython pytest
 ```
 
 You then need the lattest version of Emcee (which might not be in the usual repos).
