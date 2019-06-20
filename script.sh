@@ -14,6 +14,6 @@ conda activate GalarioFitting
 module load intel impi
 cd ~/GalarioFitting
 
-srun -n $SLURM_NTASKS python3 OptimizationGalarioMPI.py --nwalkers 560 --iterations 1000 --suffix _last
+srun -n $SLURM_NTASKS python3 OptimizationGalarioMPI.py --nwalkers 560 --iterations 10 --suffix _last
 
 conda deactivate
