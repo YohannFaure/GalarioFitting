@@ -66,17 +66,17 @@ And then you should be good to go!
 ## How to use it on a SLURM computing system (such as Leftraru)?
 
 ### installation
-Log into your account and repeat the steps above, replacing `conda` by `source`
+Log into your account and repeat the steps above.
 
 Then you might want to use MPI instead of Multiprocessing, as it allows you to use more cores, more efficiently, and to use multiple nodes. To do that, you need to install the proper packages.
 
 ```
-source activate GalarioFitting
+conda activate GalarioFitting
 module load intel impi
 export MPICC=`which mpicc`
 pip install mpi4py
 python -c 'import mpi4py'
-source deactivate
+conda deactivate
 ```
 
 If the `python -c 'import mpi4py'` line did not return an error you are good to go.
@@ -96,13 +96,13 @@ To launch a script, the classical syntax is `sbatch /path/to/script`. It's easy,
 #SBATCH --output=GalLog.out
 #SBATCH --error=GalLog.err
 
-source activate GalarioFitting
+conda activate GalarioFitting
 module load intel impi
 cd ~/GalarioFitting
 
 srun -n $SLURM_NTASKS python3 OptimizationGalarioMPI.py --nwalkers 560 --iterations 1000
 
-source deactivate
+conda deactivate
 ```
 
 You should notice that `partitions` is the type of nodes tu use (general of slims on Leftraru), `ntasks` is the total number of threads to use, and `ntasks-per-node` is the number of cpus per node.
