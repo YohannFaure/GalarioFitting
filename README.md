@@ -11,7 +11,25 @@ requirements :
 First, you should import my repository :
 `git clone https://github.com/YohannFaure/GalarioFitting.git`
 
-### Create a conda environment and install the packages
+### Create a conda environment from a file (easy version)
+
+Then you should [install conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) (if you don't already have conda) and install python3.7 on a new environment.
+If you don't know conda, see [here](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/).
+
+```
+cd GalarioFitting
+conda env create -f CondaEnv.yml
+
+conda activate GalarioFitting
+git clone https://github.com/dfm/emcee.git
+cd emcee
+python3 setup.py install
+cd ..
+rm -rf emcee
+conda deactivate
+```
+
+### Create a conda environment and install the packages (hard and often buggy version)
 
 Then you should [install conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) (if you don't already have conda) and install python3.7 on a new environment.
 If you don't know conda, see [here](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/).
@@ -47,21 +65,6 @@ Fast version :
 conda install -c conda-forge galario
 ```
 
-Cuda version (it might be even more complicated than that, depending on the computer, os, etc.).
-
-```
-conda activate GalarioFitting
-conda install -c anaconda cmake
-conda install gcc
-git clone https://github.com/mtazzari/galario.git
-cd galario
-mkdir build && cd build
-cmake .. && make
-cd ..
-cd ..
-rm -rf galario
-conda deactivate
-```
 And then you should be good to go!
 
 ## How to use it on a SLURM computing system (such as Leftraru)?
@@ -69,12 +72,17 @@ And then you should be good to go!
 ### installation
 Log into your account and repeat the steps above.
 
-Then you might want to use MPI instead of Multiprocessing, as it allows you to use more cores, more efficiently, and to use multiple nodes. To do that, you need to install the proper packages.
+#### If you've not imported the environment
+Then you might want to use MPI instead of Multiprocessing, as it allows you to use more cores, more efficiently, and to use multiple nodes.
+
+If you have not directly imported the environment, you need to install the proper packages.
 
 ```
 conda activate GalarioFitting
+conda install -c anaconda gcc
 module load intel impi
 export MPICC=`which mpicc`
+conda install -c conda-forge openmpi
 pip install mpi4py
 python -c 'import mpi4py'
 conda deactivate
