@@ -44,6 +44,7 @@ The last package is [galario](https://mtazzari.github.io/galario/install.html)
 
 ```
 conda activate GalarioFitting
+conda install -c anaconda cmake 
 git clone https://github.com/mtazzari/galario.git
 cd galario
 mkdir build && cd build
