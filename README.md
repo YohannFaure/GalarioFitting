@@ -51,7 +51,8 @@ Cuda version (it might be even more complicated than that, depending on the comp
 
 ```
 conda activate GalarioFitting
-conda install -c anaconda cmake 
+conda install -c anaconda cmake
+conda install gcc
 git clone https://github.com/mtazzari/galario.git
 cd galario
 mkdir build && cd build
