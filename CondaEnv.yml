@@ -91,5 +91,3 @@ dependencies:
   - xz=5.2.4=h14c3975_1001
   - zipp=0.5.1=py_0
   - zlib=1.2.11=h14c3975_1004
-prefix: /home/ntroncoso/miniconda3/envs/GalarioFitting
-
