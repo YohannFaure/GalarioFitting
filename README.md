@@ -64,8 +64,9 @@ Fast version :
 ```
 conda install -c conda-forge galario
 ```
+### Import the uv table
 
-And then you should be good to go!
+Just put it in the GalarioFitting directory, under the name `uvtable2.txt` and then you should be good to go!
 
 ## How to use it on a SLURM computing system (such as Leftraru)?
 
