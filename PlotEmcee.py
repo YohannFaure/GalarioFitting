@@ -90,7 +90,7 @@ if __name__=="__main__":
     parser.add_argument("--limits", help='show the limits of the optimization.', action='store_true')
     args = parser.parse_args()
     ##### Open the data
-    samples,thetaminbis,thetamaxbis,labels = np.load(args.location)
+    samples,thetaminbis,thetamaxbis,labels = np.load(args.location, allow_pickle=True)
     # thetamin and thetamax are defined in the ModelingEmcee.py file. It correspnds to the limits of the fitting. Labels are just the names of the parameters
     size=eval(args.size)
     figshape=eval(args.figshape)
