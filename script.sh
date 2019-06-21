@@ -9,7 +9,7 @@
 #SBATCH --error=results/LastOpti.err
 #SBATCH --job-name=galopti
 
-
+source ~/anaconda3/etc/profile.d/conda.sh
 conda activate GalarioFitting
 module load intel impi
 cd ~/GalarioFitting
