@@ -105,6 +105,7 @@ To launch a script, the classical syntax is `sbatch /path/to/script`. It's easy,
 #SBATCH --output=GalLog.out
 #SBATCH --error=GalLog.err
 
+source ~/anaconda3/etc/profile.d/conda.sh
 conda activate GalarioFitting
 module load intel impi
 cd ~/GalarioFitting
