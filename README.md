@@ -75,6 +75,7 @@ Just put it in the GalarioFitting directory, under the name `uvtable2.txt` and t
 ## How to use it on a SLURM computing system (such as Leftraru)?
 
 ### installation
+#### If you've imported the environment
 Log into your account and repeat the steps above.
 
 #### If you've not imported the environment
@@ -94,6 +95,8 @@ conda deactivate
 ```
 
 If the `python -c 'import mpi4py'` line did not return an error you are good to go.
+
+That might not work, and I might not be able to help you.
 
 ### Launching a script
 
