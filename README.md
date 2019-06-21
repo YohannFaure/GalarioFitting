@@ -19,7 +19,10 @@ If you don't know conda, see [here](https://uoa-eresearch.github.io/eresearch-co
 ```
 cd GalarioFitting
 conda env create -f CondaEnv.yml
+```
+You'll then want to manually install Emcee and tqdm :
 
+```
 conda activate GalarioFitting
 git clone https://github.com/dfm/emcee.git
 cd emcee
@@ -27,6 +30,7 @@ python3 setup.py install
 cd ..
 rm -rf emcee
 conda deactivate
+conda install -n GalarioFitting tqdm
 ```
 
 ### Create a conda environment and install the packages (hard and often buggy version)
