@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+This file can be used to open and plot the result of an EMCEE optimization, especially one made using OptimizationGalario.py
+"""
 from OptimizationGalario import *
 from PlotModule import *
 import matplotlib.pyplot as plt
@@ -7,21 +13,25 @@ plt.rc('font', family='serif')
 
 ##### Galario Model
 location = 'results/optimization/optigal_13_560_3000_CUDA.npy'
+#get model parameters
 values = extractvalues(location)
 
+#get the profile
 RadialModel = ModelJ1615(values[1])
+#get the visibilities
 visibilitiesModel=ComputeVisibilities(RadialModel)
+#Re and Im, and weights (uniform)
 ReModel,ImModel=ReandIm(visibilitiesModel)
 wmodel=np.ones(len(w))
 
-
-##### Data
+##### Plotting
+# Data Binning
 r1,m1,e1=Binning(Re, UVPlaneRadius, w, 1000)
 r2,m2,e2=Binning(ReModel, UVPlaneRadius, w, 1000)
 r3,m3,e3=Binning(Im, UVPlaneRadius, w, 1000)
 r4,m4,e4=Binning(ImModel, UVPlaneRadius, w, 1000)
 
-##### Plot
+# Plot config
 fig, axes=plt.subplots(2,sharex=True)
 ax=axes.flatten()
 
@@ -55,6 +65,8 @@ plt.tight_layout()
 fig.savefig('results/UVProfile.pdf')
 plt.close()
 
+
+##### Plotting the radial profile
 end=1200
 
 fig=plt.figure()
