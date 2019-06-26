@@ -19,16 +19,18 @@ from galario import deg, arcsec # for conversions
 import schwimmbad
 import sys
 
-
-from galario.double import get_image_size, chi2Profile, sampleProfile
-cuda=False
+if __name__!='__main__':
+    try:
+        from galario.double_cuda import get_image_size, chi2Profile, sampleProfile # computes the image size required from the (u,v) data , computes a chi2
+        cuda=True
+        print('cuda ON')
+    except :
+        from galario.double import get_image_size, chi2Profile, sampleProfile
+        cuda=False
+        print('cuda OFF')
 
 ##### Emcee
 from emcee import EnsembleSampler
-
-import os
-os.environ["OMP_NUM_THREADS"] = "1"
-
 
 ##### Define the parameters of the mesh
 Rmin = 1e-6  # arcsec
@@ -37,12 +39,10 @@ nR = int(1.5/dR)
 dR *= arcsec
 Rmin*=arcsec
 
-np.random.seed(15)
-
 ##### Define a mesh for the space
 R = np.linspace(Rmin, Rmin + dR*nR, nR, endpoint=False)
 u, v, Re, Im, w = np.require(np.loadtxt('uvtable2.txt', unpack=True), requirements='C')
-
+print('loaded')
 ##### Define inc and PA, as well as dRA and dDec
 ##### Those values come from TiltFinderVisibilities
 igauss,inc,PA,dRA,dDec=10.420409422990984, 0.8062268497358551, 2.5555283969130116, 4.727564265115043e-08, -2.6084635508588672e-08
@@ -248,6 +248,8 @@ if __name__=='__main__':
             cuda=False
             print('cuda OFF')
     else :
+        from galario.double import get_image_size, chi2Profile, sampleProfile
+        cuda=False
         print('cuda OFF')
     ##### Get the size of the image
     nxy, dxy = get_image_size(u, v, verbose=False)
@@ -267,6 +269,15 @@ if __name__=='__main__':
         pos1 = np.array([(1. + 1.e-2*np.random.random(ndim))*p0list[i%len(p0list)] for i in range(nwalkers//2)])
         pos2 = np.transpose([np.random.uniform(p_range[i,0],p_range[i,1],nwalkers//2+nwalkers%2) for i in range(ndim)])
         pos=np.concatenate((pos1,pos2),axis=0)
+    if cuda :
+        ##### Because we don't want each thread to use multiple core for numpy computation.
+        ##### That forces the use of a proper multithreading
+        import os
+        os.environ["OMP_NUM_THREADS"] = "4"
+        print('using 4 cores per cuda thread')
+    else :
+        import os
+        os.environ["OMP_NUM_THREADS"] = "1"
     ##### If we want to split the data
     if args.split :
         n=args.split
@@ -275,19 +286,27 @@ if __name__=='__main__':
         ##### launch the mcmc
         for i in range(n):
             with schwimmbad.MPIPool() as pool:
+                if not pool.is_master():
+                    pool.wait()
+                    sys.exit(0)
                 sampler = EnsembleSampler(nwalkers, ndim, lnpostfnbis,pool=pool)
                 pos, prob, state = sampler.run_mcmc(pos, m, progress=True)
+                pool.close()
+                sys.exit(0)
             # save each part
-
             samples=sampler.chain
             #To save the data.
             np.save("results/optimization/optigal_{}_{}_{}{}_split{}.npy".format(ndim, nwalkers, iterations, args.suffix, i),(samples,p_range[:,0],p_range[:,1],labels))
             print(i,' out of ',n)
         if lastm!=0:
             with schwimmbad.MPIPool() as pool:
+                if not pool.is_master():
+                    pool.wait()
+                    sys.exit(0)
                 sampler = EnsembleSampler(nwalkers, ndim, lnpostfnbis,pool=pool)
                 pos, prob, state = sampler.run_mcmc(pos, lastm, progress=True)
-
+                pool.close()
+                sys.exit(0)
             samples=sampler.chain
             #To save the data.
             np.save("results/optimization/optigal_{}_{}_{}{}_split{}.npy".format(ndim, nwalkers, iterations, args.suffix,n),(samples,p_range[:,0],p_range[:,1],labels))
