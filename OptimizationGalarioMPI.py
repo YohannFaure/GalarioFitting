@@ -13,12 +13,12 @@ python3 OptimizationGalario.py
 '''
 ##### Import modules
 import numpy as np
-import matplotlib.pyplot as plt
 import math
 import scipy
 from galario import deg, arcsec # for conversions
-from schwimmbad import MPIPool
+import schwimmbad
 import sys
+
 
 from galario.double import get_image_size, chi2Profile, sampleProfile
 cuda=False
@@ -28,12 +28,16 @@ from emcee import EnsembleSampler
 
 import os
 os.environ["OMP_NUM_THREADS"] = "1"
+
+
 ##### Define the parameters of the mesh
 Rmin = 1e-6  # arcsec
 dR = 0.0008    # arcsec
 nR = int(1.5/dR)
 dR *= arcsec
 Rmin*=arcsec
+
+np.random.seed(15)
 
 ##### Define a mesh for the space
 R = np.linspace(Rmin, Rmin + dR*nR, nR, endpoint=False)
@@ -270,10 +274,7 @@ if __name__=='__main__':
         lastm=iterations%n
         ##### launch the mcmc
         for i in range(n):
-            with MPIPool() as pool:
-                if not pool.is_master():
-                    pool.wait()
-                    sys.exit(0)
+            with schwimmbad.MPIPool() as pool:
                 sampler = EnsembleSampler(nwalkers, ndim, lnpostfnbis,pool=pool)
                 pos, prob, state = sampler.run_mcmc(pos, m, progress=True)
             # save each part
@@ -281,11 +282,9 @@ if __name__=='__main__':
             samples=sampler.chain
             #To save the data.
             np.save("results/optimization/optigal_{}_{}_{}{}_split{}.npy".format(ndim, nwalkers, iterations, args.suffix, i),(samples,p_range[:,0],p_range[:,1],labels))
+            print(i,' out of ',n)
         if lastm!=0:
-            with MPIPool() as pool:
-                if not pool.is_master():
-                    pool.wait()
-                    sys.exit(0)
+            with schwimmbad.MPIPool() as pool:
                 sampler = EnsembleSampler(nwalkers, ndim, lnpostfnbis,pool=pool)
                 pos, prob, state = sampler.run_mcmc(pos, lastm, progress=True)
 
@@ -295,12 +294,14 @@ if __name__=='__main__':
     ##### If we don't want to split
     else :
         ##### execute the MCMC
-        with MPIPool() as pool:
+        with schwimmbad.MPIPool() as pool:
             if not pool.is_master():
                 pool.wait()
                 sys.exit(0)
             sampler = EnsembleSampler(nwalkers, ndim, lnpostfnbis,pool=pool)
             pos, prob, state = sampler.run_mcmc(pos, iterations, progress=True)
+            pool.close()
+            sys.exit(0)
         samples=sampler.chain
         #To save the data.
         np.save("results/optimization/optigal_{}_{}_{}{}.npy".format(ndim, nwalkers, iterations, args.suffix),(samples,p_range[:,0],p_range[:,1],labels))

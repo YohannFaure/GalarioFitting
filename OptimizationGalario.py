@@ -13,7 +13,6 @@ python3 OptimizationGalario.py
 '''
 ##### Import modules
 import numpy as np
-import matplotlib.pyplot as plt
 import math
 import scipy
 from galario import deg, arcsec # for conversions
@@ -269,12 +268,15 @@ if __name__=='__main__':
         pos1 = np.array([(1. + 1.e-2*np.random.random(ndim))*p0list[i%len(p0list)] for i in range(nwalkers//2)])
         pos2 = np.transpose([np.random.uniform(p_range[i,0],p_range[i,1],nwalkers//2+nwalkers%2) for i in range(ndim)])
         pos=np.concatenate((pos1,pos2),axis=0)
-    if not cuda :
+    if cuda :
         ##### Because we don't want each thread to use multiple core for numpy computation.
         ##### That forces the use of a proper multithreading
         import os
+        os.environ["OMP_NUM_THREADS"] = "4"
+        print('using 4 cores per cuda thread')
+    else :
+        import os
         os.environ["OMP_NUM_THREADS"] = "1"
-
     ##### If we want to split the data
     if args.split :
         n=args.split
