@@ -47,19 +47,22 @@ def Binning(vals,radius,weights,BinsNumber):
     e=np.transpose(e)
     return(r,m,e)
 
-r,m,e=Binning(Re, UVPlaneRadius, w, 100)
+from galario.double import get_image_size, chi2Profile, sampleProfile
 
-plt.errorbar(r,m,e)
-plt.scatter(r,m,marker=x)
-plt.grid()
-plt.show()
+def extractvalues(location,lconv=500,percentiles=[0.15,0.5,0.85]):
+    samples,thetaminbis,thetamaxbis,labels=np.load(location,allow_pickle=True)
+    l1,l2,l3=samples.shape
+    samples_converged=samples[:,-lconv:,:].reshape(lconv*l1,l3)
+    values=np.percentile(samples_converged,percentiles,axis=0)
+    return(values)
 
 
+nxy, dxy = get_image_size(u, v, verbose=False)
 
-r,m,e=Binning(Re, UVPlaneRadius, w, 100)
+def ComputeVisibilities(RadialModel):
+    return(sampleProfile(RadialModel,Rmin,dR,nxy,dxy,u,v))
 
-plt.errorbar(r,m,e)
-plt.scatter(r,m,marker=x)
-plt.grid()
-plt.show()
+def ReandIm(x):
+    return(np.real(x),np.imag(x))
+
 
