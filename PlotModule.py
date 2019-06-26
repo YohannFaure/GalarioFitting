@@ -54,3 +54,12 @@ plt.scatter(r,m,marker=x)
 plt.grid()
 plt.show()
 
+
+
+r,m,e=Binning(Re, UVPlaneRadius, w, 100)
+
+plt.errorbar(r,m,e)
+plt.scatter(r,m,marker=x)
+plt.grid()
+plt.show()
+
