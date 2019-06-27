@@ -67,7 +67,7 @@ def cornerplot(samples,labels=None,save=None):
     """Just makes a cornerplot, but makes it easier
     Beware of the segmentation faults..."""
     nwalkers,iterations,ndims = samples.shape
-    ndims=min(6,ndims)
+    ndims=min(15,ndims)
     cornering=(samples[:,-500:,:ndims].reshape((-1,ndims)))
     if labels:
         fig = corner.corner(cornering, quantiles=[0.16, 0.50, 0.84],labels=labels[:ndims],show_titles=True,label_kwargs={'labelpad':20, 'fontsize':0}, fontsize=8)

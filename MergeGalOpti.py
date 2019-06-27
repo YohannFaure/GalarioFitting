@@ -12,10 +12,10 @@ it will be saved in optigalmerged.npy
 import numpy as np
 
 def Merge(prefix,start,end):
-    MergedOpti,val1,val2,val3=np.load('{}{}.npy'.format(prefix,start))
+    MergedOpti,val1,val2,val3=np.load('{}{}.npy'.format(prefix,start),allow_pickle=True)
     for i in range(start+1,end+1):
-        MergedOpti=np.concatenate((MergedOpti,np.load('{}{}.npy'.format(prefix,i))[0]),axis=1)
-    np.save('{}merged.npy'.format(prefix),(MergedOpti,val1,val2,val3))
+        MergedOpti=np.concatenate((MergedOpti,np.load('{}{}.npy'.format(prefix,i),allow_pickle=True)[0]),axis=1)
+    np.save('{}merged.npy'.format(prefix),(MergedOpti,val1,val2,val3),allow_pickle=True)
 
 
 if __name__=='__main__':
