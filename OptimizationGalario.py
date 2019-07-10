@@ -59,7 +59,7 @@ def GaussianRing(amplitude, width, center):
     This makes a gaussian ring centered on (xc,yc), elliptic with semi-axis a and b, and rotation theta.
     """
     # compute gaussian
-    return( amplitude * np.exp(  ( -.5*(width**-2.) ) * ((R-center)**2.) ) ) 
+    return( amplitude * np.exp(  ( -.5*(width**-2.) ) * ((R-center)**2.) ) )
 
 def PowerGaussianRing(i0,sig,gam,center):
     """
@@ -271,9 +271,10 @@ if __name__=='__main__':
     if cuda :
         ##### Because we don't want each thread to use multiple core for numpy computation.
         ##### That forces the use of a proper multithreading
+        ##### Considers that you use 44 cpus on the machine
         import os
-        os.environ["OMP_NUM_THREADS"] = "4"
-        print('using 4 cores per cuda thread')
+        os.environ["OMP_NUM_THREADS"] = "{}".format(44//args.nthreads)
+        print('using {} cores per cuda thread'.format(44//args.nthreads))
     else :
         import os
         os.environ["OMP_NUM_THREADS"] = "1"
@@ -309,4 +310,3 @@ if __name__=='__main__':
         samples=sampler.chain
         #To save the data.
         np.save("results/optimization/optigal_{}_{}_{}{}.npy".format(ndim, nwalkers, iterations, args.suffix),(samples,p_range[:,0],p_range[:,1],labels))
-
